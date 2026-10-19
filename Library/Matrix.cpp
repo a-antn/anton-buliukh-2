@@ -19,12 +19,12 @@ namespace miit::algebra
             throw std::invalid_argument("оба размера должны быть положительными либо равны нулю");
         }
 
-        if (columns != 0 && rows > data.max_size() / columns)
+        if (rows > data.max_size() || columns > std::vector<T>().max_size())
         {
             throw std::length_error("слишком большой размер массива");
         }
 
-        data.assign(rows * columns, value);
+        data.assign(rows, std::vector<T>(columns, value));
     }
 
     template <typename T>
@@ -52,9 +52,8 @@ namespace miit::algebra
     {
         if (this != &other)
         {
-            data = other.data;
-            rows = other.rows;
-            columns = other.columns;
+            Matrix<T> copy(other);
+            swap(copy);
         }
 
         return *this;
@@ -102,7 +101,7 @@ namespace miit::algebra
             throw std::out_of_range("индекс строки выходит за границы массива");
         }
 
-        return data.data() + row * columns;
+        return data[row].data();
     }
 
     template <typename T>
@@ -113,7 +112,7 @@ namespace miit::algebra
             throw std::out_of_range("индекс строки выходит за границы массива");
         }
 
-        return data.data() + row * columns;
+        return data[row].data();
     }
 
     template <typename T>
@@ -124,7 +123,7 @@ namespace miit::algebra
             throw std::out_of_range("индексы элемента выходят за границы массива");
         }
 
-        return data[row * columns + column];
+        return data[row][column];
     }
 
     template <typename T>
@@ -135,17 +134,20 @@ namespace miit::algebra
             throw std::out_of_range("индексы элемента выходят за границы массива");
         }
 
-        return data[row * columns + column];
+        return data[row][column];
     }
 
     template <typename T>
     void Matrix<T>::fill(Generator& generator)
     {
-        std::vector<T> generated(data.size());
+        std::vector<std::vector<T>> generated(rows, std::vector<T>(columns));
 
-        for (T& value : generated)
+        for (std::size_t i = 0; i < rows; ++i)
         {
-            value = static_cast<T>(generator.generate());
+            for (std::size_t j = 0; j < columns; ++j)
+            {
+                generated[i][j] = static_cast<T>(generator.generate());
+            }
         }
 
         data.swap(generated);
@@ -165,7 +167,7 @@ namespace miit::algebra
                     result += ' ';
                 }
 
-                result += std::to_string(data[i * columns + j]);
+                result += std::to_string(data[i][j]);
             }
 
             result += '\n';
