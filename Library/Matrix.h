@@ -8,7 +8,7 @@
 namespace miit::algebra
 {
     /**
-     * @brief хранит двумерный массив чисел в одном векторе
+     * @brief хранит двумерный массив чисел в векторе строк
      * @tparam T тип элементов массива в проекте подготовлены int и double
      */
     template <typename T>
@@ -17,7 +17,7 @@ namespace miit::algebra
     private:
         std::size_t rows;
         std::size_t columns;
-        std::vector<T> data;
+        std::vector<std::vector<T>> data;
 
     public:
         /**
@@ -48,7 +48,7 @@ namespace miit::algebra
         Matrix(Matrix<T>&& other) noexcept;
 
         /**
-         * @brief освобождает память занятую вектором
+         * @brief освобождает память занятую векторами
          */
         ~Matrix();
 
