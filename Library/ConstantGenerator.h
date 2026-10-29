@@ -23,6 +23,6 @@ namespace miit::algebra
          * @brief получает сохраненное значение
          * @return значение заданное при создании генератора
          */
-        int generate() override;
+        int generate() const override;
     };
 }

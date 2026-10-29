@@ -100,7 +100,7 @@ int main()
 
         Matrix<int> first(rows, columns);
         Task1 task1(first, *generator);
-        task1.fill();
+        first.fill(*generator);
 
         // оба задания получают одинаковые исходные значения
         const Matrix<int> original(first);

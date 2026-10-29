@@ -17,6 +17,6 @@ namespace miit::algebra
          * @brief получает следующее число для заполнения массива
          * @return сгенерированное значение
          */
-        virtual int generate() = 0;
+        virtual int generate() const = 0;
     };
 }

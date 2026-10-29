@@ -26,6 +26,6 @@ namespace miit::algebra
          * @return считанное значение типа int
          * @throw std::runtime_error если ввод неверный или значения закончились
          */
-        int generate() override;
+        int generate() const override;
     };
 }

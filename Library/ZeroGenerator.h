@@ -19,6 +19,6 @@ namespace miit::algebra
          * @brief получает нулевое значение
          * @return ноль
          */
-        int generate() override;
+        int generate() const override;
     };
 }

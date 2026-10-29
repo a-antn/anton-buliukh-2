@@ -4,7 +4,7 @@
 
 namespace miit::algebra
 {
-    Task2::Task2(Matrix<int>& matrix, Generator& generator)
+    Task2::Task2(Matrix<int>& matrix, const Generator& generator)
         : Exercise{matrix, generator}
     {
     }

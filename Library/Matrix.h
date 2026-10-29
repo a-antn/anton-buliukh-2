@@ -8,7 +8,7 @@
 namespace miit::algebra
 {
     /**
-     * @brief хранит двумерный массив чисел в векторе строк
+     * @brief хранит двумерный массив чисел в одном векторе
      * @tparam T тип элементов массива в проекте подготовлены int и double
      */
     template <typename T>
@@ -17,7 +17,7 @@ namespace miit::algebra
     private:
         std::size_t rows;
         std::size_t columns;
-        std::vector<std::vector<T>> data;
+        std::vector<T> data;
 
     public:
         /**
@@ -29,11 +29,10 @@ namespace miit::algebra
          * @brief создает массив заданного размера
          * @param rows количество строк
          * @param columns количество столбцов
-         * @param value начальное значение элементов
          * @throws std::invalid_argument если только один из размеров равен нулю
          * @throws std::length_error если размер массива слишком большой
          */
-        Matrix(const std::size_t rows, const std::size_t columns, const T& value = T{});
+        Matrix(const std::size_t rows, const std::size_t columns);
 
         /**
          * @brief создает независимую копию массива
@@ -48,7 +47,7 @@ namespace miit::algebra
         Matrix(Matrix<T>&& other) noexcept;
 
         /**
-         * @brief освобождает память занятую векторами
+         * @brief освобождает память занятую вектором
          */
         ~Matrix();
 
@@ -103,29 +102,11 @@ namespace miit::algebra
         const T* operator[](const std::size_t row) const;
 
         /**
-         * @brief получает элемент с проверкой обоих индексов
-         * @param row индекс строки начиная с нуля
-         * @param column индекс столбца начиная с нуля
-         * @return ссылка на элемент массива
-         * @throws std::out_of_range если любой индекс выходит за границы
-         */
-        T& at(const std::size_t row, const std::size_t column);
-
-        /**
-         * @brief получает элемент без возможности его изменить
-         * @param row индекс строки начиная с нуля
-         * @param column индекс столбца начиная с нуля
-         * @return константная ссылка на элемент массива
-         * @throws std::out_of_range если любой индекс выходит за границы
-         */
-        const T& at(const std::size_t row, const std::size_t column) const;
-
-        /**
          * @brief заполняет массив с помощью выбранного генератора
          * @param generator генератор значений
          * @note при ошибке генератора содержимое массива не меняется
          */
-        void fill(Generator& generator);
+        void fill(const Generator& generator);
 
         /**
          * @brief получает содержимое массива в виде строки

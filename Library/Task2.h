@@ -15,7 +15,7 @@ namespace miit::algebra
          * @param matrix обрабатываемый массив
          * @param generator генератор для заполнения массива
          */
-        Task2(Matrix<int>& matrix, Generator& generator);
+        Task2(Matrix<int>& matrix, const Generator& generator);
 
         /**
          * @brief вставляет копию первой строки после строк с номерами 1 3 5 и далее

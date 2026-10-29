@@ -13,7 +13,7 @@ namespace miit::algebra
     {
     protected:
         Matrix<int>& matrix;
-        Generator& generator;
+        const Generator& generator;
 
     public:
         /**
@@ -21,17 +21,12 @@ namespace miit::algebra
          * @param matrix массив который будет изменять задание
          * @param generator генератор значений для заполнения массива
          */
-        Exercise(Matrix<int>& matrix, Generator& generator);
+        Exercise(Matrix<int>& matrix, const Generator& generator);
 
         /**
          * @brief завершает работу с заданием не удаляя массив и генератор
          */
         virtual ~Exercise();
-
-        /**
-         * @brief заполняет связанный массив выбранным генератором
-         */
-        void fill();
 
         /**
          * @brief выполняет конкретное задание над массивом

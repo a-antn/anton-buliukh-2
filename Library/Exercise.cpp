@@ -2,15 +2,10 @@
 
 namespace miit::algebra
 {
-    Exercise::Exercise(Matrix<int>& matrix, Generator& generator)
+    Exercise::Exercise(Matrix<int>& matrix, const Generator& generator)
         : matrix{matrix}, generator{generator}
     {
     }
 
     Exercise::~Exercise() = default;
-
-    void Exercise::fill()
-    {
-        matrix.fill(generator);
-    }
 }

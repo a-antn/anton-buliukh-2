@@ -55,7 +55,7 @@ namespace
         {
             for (std::size_t j = 0; j < columns; ++j)
             {
-                matrix.at(i, j) = *value++;
+                matrix[i][j] = *value++;
             }
         }
         return matrix;
@@ -76,7 +76,7 @@ namespace
         {
             for (std::size_t j = 0; j < actual.getColumns(); ++j)
             {
-                require(actual.at(i, j) == expected.at(i, j), message);
+                require(actual[i][j] == expected[i][j], message);
             }
         }
     }
@@ -99,7 +99,8 @@ namespace
     void testSizeConstructor()
     {
         const Matrix<int> zero(2, 3);
-        const Matrix<int> constant(2, 3, -7);
+        Matrix<int> constant(2, 3);
+        constant.fill(ConstantGenerator(-7));
         requireEqual(zero, makeMatrix(2, 3, {0, 0, 0, 0, 0, 0}),
             "элементы не заполнены нулями");
         requireEqual(constant, makeMatrix(2, 3, {-7, -7, -7, -7, -7, -7}),
@@ -140,8 +141,8 @@ namespace
         const Matrix<int> original = makeMatrix(2, 2, {1, 2, 3, 4});
         Matrix<int> copy(original);
         requireEqual(copy, original, "конструктор копирования потерял значения");
-        copy.at(0, 0) = 100;
-        require(original.at(0, 0) == 1, "изменение копии изменило исходную матрицу");
+        copy[0][0] = 100;
+        require(original[0][0] == 1, "изменение копии изменило исходную матрицу");
         const Matrix<int> empty;
         require(Matrix<int>(empty).empty(), "не удалось скопировать пустую матрицу");
     }
@@ -152,11 +153,12 @@ namespace
     void testCopyAssignment()
     {
         const Matrix<int> source = makeMatrix(2, 3, {1, 2, 3, 4, 5, 6});
-        Matrix<int> target(1, 1, 9);
+        Matrix<int> target(1, 1);
+        target.fill(ConstantGenerator(9));
         require(&(target = source) == &target, "присваивание должно возвращать сам объект");
         requireEqual(target, source, "присваивание не заменило размер и значения");
-        target.at(0, 0) = 100;
-        require(source.at(0, 0) == 1, "присваивание создало общие элементы");
+        target[0][0] = 100;
+        require(source[0][0] == 1, "присваивание создало общие элементы");
         Matrix<int> another;
         another = target = source;
         requireEqual(another, source, "цепочка присваиваний работает неверно");
@@ -187,8 +189,9 @@ namespace
         requireEqual(target, expected, "конструктор перемещения потерял данные");
         require(source.empty() && source.getRows() == 0 && source.getColumns() == 0,
             "исходный объект после перемещения должен стать пустым");
-        source = Matrix<int>(1, 1, 8);
-        require(source.at(0, 0) == 8, "исходный объект нельзя использовать повторно");
+        source = Matrix<int>(1, 1);
+        source.fill(ConstantGenerator(8));
+        require(source[0][0] == 8, "исходный объект нельзя использовать повторно");
     }
 
     /**
@@ -198,7 +201,8 @@ namespace
     {
         Matrix<int> source = makeMatrix(2, 3, {1, 2, 3, 4, 5, 6});
         const Matrix<int> expected(source);
-        Matrix<int> target(1, 1, -1);
+        Matrix<int> target(1, 1);
+        target.fill(ConstantGenerator(-1));
         require(&(target = std::move(source)) == &target,
             "перемещающее присваивание должно возвращать сам объект");
         requireEqual(target, expected, "перемещающее присваивание потеряло данные");
@@ -207,43 +211,27 @@ namespace
     }
 
     /**
-     * @brief проверяет чтение и изменение элементов через индекс и метод at
+     * @brief проверяет чтение и изменение элементов через индекс
      */
     void testElementAccess()
     {
         Matrix<int> matrix(2, 3);
         matrix[1][2] = 12;
-        matrix.at(0, 1) = -5;
+        matrix[0][1] = -5;
         const Matrix<int>& constant = matrix;
-        require(matrix.at(1, 2) == 12, "оператор индексации не изменил элемент");
+        require(matrix[1][2] == 12, "оператор индексации не изменил элемент");
         require(constant[0][1] == -5, "константный оператор индексации читает неверно");
-        require(constant.at(1, 2) == 12, "константный метод at читает неверно");
+        require(constant[1][2] == 12, "константный оператор индексации читает неверно");
     }
 
     /**
-     * @brief проверяет защиту от выхода за границы в методе at и первом индексе
+     * @brief проверяет защиту от выхода за границы в первом индексе
      */
     void testBounds()
     {
         Matrix<int> matrix(2, 3);
         const Matrix<int>& constant = matrix;
         int errors = 0;
-        try
-        {
-            matrix.at(2, 0);
-        }
-        catch (const std::out_of_range&)
-        {
-            ++errors;
-        }
-        try
-        {
-            constant.at(0, 3);
-        }
-        catch (const std::out_of_range&)
-        {
-            ++errors;
-        }
         try
         {
             matrix[2];
@@ -260,7 +248,7 @@ namespace
         {
             ++errors;
         }
-        require(errors == 4, "выход за границы матрицы не обнаружен");
+        require(errors == 2, "выход за границы матрицы не обнаружен");
     }
 
     /**
@@ -278,15 +266,16 @@ namespace
      */
     void testDoubleMatrix()
     {
-        Matrix<double> matrix(1, 2, 1.25);
+        Matrix<double> matrix(1, 2);
+        matrix[0][0] = 1.25;
         matrix[0][1] = -2.5;
         Matrix<double> copy(matrix);
         require(copy.toString() == "1.250000 -2.500000\n",
             "шаблон матрицы неверно работает с double");
-        copy.at(0, 0) = 10.0;
-        require(matrix.at(0, 0) == 1.25, "копия double матрицы не независима");
+        copy[0][0] = 10.0;
+        require(matrix[0][0] == 1.25, "копия double матрицы не независима");
         Matrix<double> moved(std::move(copy));
-        require(moved.at(0, 0) == 10.0 && copy.empty(),
+        require(moved[0][0] == 10.0 && copy.empty(),
             "перемещение double матрицы работает неверно");
     }
 
@@ -295,9 +284,9 @@ namespace
      */
     void testConstantAndZeroGenerators()
     {
-        ConstantGenerator constant(-17);
-        ZeroGenerator zero;
-        Generator& base = constant;
+        const ConstantGenerator constant(-17);
+        const ZeroGenerator zero;
+        const Generator& base = constant;
         for (int i = 0; i < 5; ++i)
         {
             require(base.generate() == -17, "генератор константы изменил значение");
@@ -310,7 +299,7 @@ namespace
      */
     void testRandomGenerator()
     {
-        RandomGenerator random(-3, 5);
+        const RandomGenerator random(-3, 5);
         for (int i = 0; i < 200; ++i)
         {
             const int value = random.generate();
@@ -342,8 +331,8 @@ namespace
     void testFill()
     {
         Matrix<int> matrix(2, 2);
-        ConstantGenerator constant(7);
-        ZeroGenerator zero;
+        const ConstantGenerator constant(7);
+        const ZeroGenerator zero;
         matrix.fill(constant);
         requireEqual(matrix, makeMatrix(2, 2, {7, 7, 7, 7}),
             "заполнение константой работает неверно");
@@ -352,7 +341,7 @@ namespace
             "заполнение нулями работает неверно");
         Matrix<double> real(1, 2);
         real.fill(constant);
-        require(real.at(0, 0) == 7.0 && real.at(0, 1) == 7.0,
+        require(real[0][0] == 7.0 && real[0][1] == 7.0,
             "генератор не заполняет double матрицу");
         Matrix<int> empty;
         empty.fill(constant);
@@ -365,7 +354,7 @@ namespace
     void testFillFromInput()
     {
         std::istringstream input("1 -2 3 4 5 6");
-        IStreamGenerator generator(input);
+        const IStreamGenerator generator(input);
         Matrix<int> matrix(2, 3);
         matrix.fill(generator);
         requireEqual(matrix, makeMatrix(2, 3, {1, -2, 3, 4, 5, 6}),
@@ -377,7 +366,8 @@ namespace
      */
     void testFillFailure()
     {
-        Matrix<int> matrix(2, 2, 7);
+        Matrix<int> matrix(2, 2);
+        matrix.fill(ConstantGenerator(7));
         const Matrix<int> before(matrix);
         std::istringstream input("1 2 неверно 4");
         IStreamGenerator generator(input);
@@ -490,7 +480,8 @@ namespace
         const std::string invalid[] = {"1 2", "1 x 3 4"};
         for (const std::string& value : invalid)
         {
-            Matrix<int> matrix(2, 2, 9);
+            Matrix<int> matrix(2, 2);
+            matrix.fill(ConstantGenerator(9));
             const Matrix<int> before(matrix);
             std::istringstream input(value);
             input >> matrix;
@@ -511,14 +502,15 @@ namespace
         stream >> copy;
         require(!stream.fail(), "не удалось прочитать ранее выведенную матрицу");
         requireEqual(copy, source, "вывод и ввод изменили целую матрицу");
-        Matrix<double> real(1, 2, 1.25);
-        real.at(0, 1) = -2.5;
+        Matrix<double> real(1, 2);
+        real[0][0] = 1.25;
+        real[0][1] = -2.5;
         Matrix<double> realCopy(1, 2);
         std::stringstream realStream;
         realStream << real;
         realStream >> realCopy;
-        require(!realStream.fail() && realCopy.at(0, 0) == 1.25
-            && realCopy.at(0, 1) == -2.5, "вывод и ввод изменили вещественную матрицу");
+        require(!realStream.fail() && realCopy[0][0] == 1.25
+            && realCopy[0][1] == -2.5, "вывод и ввод изменили вещественную матрицу");
     }
 
     /**
@@ -727,13 +719,14 @@ namespace
     {
         Matrix<int> first(1, 4);
         Matrix<int> second(2, 1);
-        ConstantGenerator generator(-2);
+        const ConstantGenerator generator(-2);
+        first.fill(generator);
+        second.fill(generator);
         Task1 task1(first, generator);
         Task2 task2(second, generator);
         Exercise* exercises[] = {&task1, &task2};
         for (Exercise* exercise : exercises)
         {
-            exercise->fill();
             exercise->solve();
         }
         requireEqual(first, makeMatrix(1, 4, {4, 4, 4, -2}),

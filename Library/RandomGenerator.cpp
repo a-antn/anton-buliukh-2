@@ -14,7 +14,7 @@ namespace miit::algebra
         generator = std::mt19937(std::random_device{}());
     }
 
-    int RandomGenerator::generate()
+    int RandomGenerator::generate() const
     {
         return distribution(generator);
     }

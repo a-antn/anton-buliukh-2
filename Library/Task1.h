@@ -15,7 +15,7 @@ namespace miit::algebra
          * @param matrix обрабатываемый массив
          * @param generator генератор для заполнения массива
          */
-        Task1(Matrix<int>& matrix, Generator& generator);
+        Task1(Matrix<int>& matrix, const Generator& generator);
 
         /**
          * @brief заменяет элементы первых трех столбцов их квадратами

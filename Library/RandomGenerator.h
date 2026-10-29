@@ -11,8 +11,9 @@ namespace miit::algebra
     class RandomGenerator final : public Generator
     {
     private:
-        std::uniform_int_distribution<int> distribution;
-        std::mt19937 generator;
+        // mutable нужен чтобы получать новые случайные числа даже в const методе
+        mutable std::uniform_int_distribution<int> distribution;
+        mutable std::mt19937 generator;
 
     public:
         /**
@@ -27,6 +28,6 @@ namespace miit::algebra
          * @brief получает случайное число
          * @return число от min до max
          */
-        int generate() override;
+        int generate() const override;
     };
 }

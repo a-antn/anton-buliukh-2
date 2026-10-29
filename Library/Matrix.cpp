@@ -11,7 +11,7 @@ namespace miit::algebra
     }
 
     template <typename T>
-    Matrix<T>::Matrix(const std::size_t rows, const std::size_t columns, const T& value)
+    Matrix<T>::Matrix(const std::size_t rows, const std::size_t columns)
         : rows{rows}, columns{columns}, data{}
     {
         if ((rows == 0) != (columns == 0))
@@ -19,12 +19,12 @@ namespace miit::algebra
             throw std::invalid_argument("оба размера должны быть положительными либо равны нулю");
         }
 
-        if (rows > data.max_size() || columns > std::vector<T>().max_size())
+        if (columns != 0 && rows > data.max_size() / columns)
         {
             throw std::length_error("слишком большой размер массива");
         }
 
-        data.assign(rows, std::vector<T>(columns, value));
+        data.resize(rows * columns);
     }
 
     template <typename T>
@@ -52,8 +52,9 @@ namespace miit::algebra
     {
         if (this != &other)
         {
-            Matrix<T> copy(other);
-            swap(copy);
+            data = other.data;
+            rows = other.rows;
+            columns = other.columns;
         }
 
         return *this;
@@ -101,7 +102,7 @@ namespace miit::algebra
             throw std::out_of_range("индекс строки выходит за границы массива");
         }
 
-        return data[row].data();
+        return data.data() + row * columns;
     }
 
     template <typename T>
@@ -112,42 +113,17 @@ namespace miit::algebra
             throw std::out_of_range("индекс строки выходит за границы массива");
         }
 
-        return data[row].data();
+        return data.data() + row * columns;
     }
 
     template <typename T>
-    T& Matrix<T>::at(const std::size_t row, const std::size_t column)
+    void Matrix<T>::fill(const Generator& generator)
     {
-        if (row >= rows || column >= columns)
+        std::vector<T> generated(data.size());
+
+        for (T& value : generated)
         {
-            throw std::out_of_range("индексы элемента выходят за границы массива");
-        }
-
-        return data[row][column];
-    }
-
-    template <typename T>
-    const T& Matrix<T>::at(const std::size_t row, const std::size_t column) const
-    {
-        if (row >= rows || column >= columns)
-        {
-            throw std::out_of_range("индексы элемента выходят за границы массива");
-        }
-
-        return data[row][column];
-    }
-
-    template <typename T>
-    void Matrix<T>::fill(Generator& generator)
-    {
-        std::vector<std::vector<T>> generated(rows, std::vector<T>(columns));
-
-        for (std::size_t i = 0; i < rows; ++i)
-        {
-            for (std::size_t j = 0; j < columns; ++j)
-            {
-                generated[i][j] = static_cast<T>(generator.generate());
-            }
+            value = static_cast<T>(generator.generate());
         }
 
         data.swap(generated);
@@ -167,7 +143,7 @@ namespace miit::algebra
                     result += ' ';
                 }
 
-                result += std::to_string(data[i][j]);
+                result += std::to_string(data[i * columns + j]);
             }
 
             result += '\n';
